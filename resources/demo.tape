@@ -30,7 +30,7 @@ Sleep 300ms
 Enter
 Sleep 2s
 
-Type "rr loop # run the block labeled 'loop'"
+Type@500ms "rr loop # run the block labeled 'loop'"
 Sleep 300ms
 Enter
 Sleep 2s
@@ -38,4 +38,4 @@ Sleep 2s
 Type "rr # list available tasks"
 Sleep 300ms
 Enter
-Sleep 5s
+Sleep 7s
