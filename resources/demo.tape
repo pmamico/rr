@@ -30,7 +30,7 @@ Sleep 600ms
 Enter
 Sleep 2.5s
 
-Type@35ms "rr loop # run the block labeled 'loop'"
+Type "rr loop # run the block labeled 'loop'"
 Sleep 600ms
 Enter
 Sleep 2.5s
