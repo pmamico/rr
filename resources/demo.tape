@@ -1,9 +1,9 @@
 Output demo.gif
 Require tmux
 
-Set Height 500
-Set Width 800
-Set FontSize 10
+Set Height 1000
+Set Width 1600
+Set FontSize 20
 
 Hide
   Type "tmux" Enter
