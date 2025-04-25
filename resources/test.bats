@@ -50,38 +50,57 @@ setup() {
   assert_output "Error: no block number 2 found."
 }
 
-@test "RR_FILE=documented_blocks.md rr" {
-  export RR_FILE="resources/documented_blocks.md"
+@test "RR_FILE=\"test_cases.md\" rr" {
+  export RR_FILE="resources/test_cases.md"
   run rr
 
-  expected=$'rr 1 / rr build\necho "build"\n\nrr 2 / rr second block\necho "Second Block"\n\nrr 3\necho "Block without a label"'
+  expected=$(cat <<'EOF'
+rr 1 / rr build
+echo "build"
+
+rr 2 / rr second block
+echo "Second Block"
+
+rr 3
+echo "Block without a label"
+
+rr 4
+counter=1
+while [ "$counter" -le 15 ]; do
+  echo "Item $counter"
+  counter=$((counter+1))
+done
+echo "Done"
+EOF
+)
+
   assert_output "$expected"
 }
 
-@test "RR_FILE="documented_blocks.md" rr 1 --dry" {
-  export RR_FILE="resources/documented_blocks.md"
+@test "RR_FILE="test_cases.md" rr 1 --dry" {
+  export RR_FILE="resources/test_cases.md"
   run rr 1 --dry
 
   assert_output 'echo "build"'
 }
 
-@test "RR_FILE="documented_blocks.md" rr 1" {
-  export RR_FILE="resources/documented_blocks.md"
+@test "RR_FILE="test_cases.md" rr 1" {
+  export RR_FILE="resources/test_cases.md"
   run rr 1
 
   assert_output 'build'
 }
 
-@test "RR_FILE="documented_blocks.md" rr build --dry" {
-  export RR_FILE="resources/documented_blocks.md"
+@test "RR_FILE="test_cases.md" rr build --dry" {
+  export RR_FILE="resources/test_cases.md"
   run rr build --dry
 
   assert_output 'echo "build"'
 }
 
 
-@test "RR_FILE="documented_blocks.md" rr build" {
-  export RR_FILE="resources/documented_blocks.md"
+@test "RR_FILE="test_cases.md" rr build" {
+  export RR_FILE="resources/test_cases.md"
   run rr build
 
   assert_output 'build'
@@ -89,23 +108,56 @@ setup() {
 
 
 
-@test "RR_FILE="documented_blocks.md" rr second block --dry" {
-  export RR_FILE="resources/documented_blocks.md"
+@test "RR_FILE="test_cases.md" rr second block --dry" {
+  export RR_FILE="resources/test_cases.md"
   run rr second block --dry
 
   assert_output 'echo "Second Block"'
 }
 
-@test "RR_FILE="documented_blocks.md" rr second block" {
-  export RR_FILE="resources/documented_blocks.md"
+@test "RR_FILE="test_cases.md" rr second block" {
+  export RR_FILE="resources/test_cases.md"
   run rr second block
 
   assert_output 'Second Block'
 }
 
-@test "RR_FILE="documented_blocks.md" rr 3 --dry" {
-  export RR_FILE="resources/documented_blocks.md"
+@test "RR_FILE="test_cases.md" rr 3 --dry" {
+  export RR_FILE="resources/test_cases.md"
   run rr 3 --dry
 
   assert_output 'echo "Block without a label"'
+}
+
+@test "RR_FILE="test_cases.md" rr 3" {
+  export RR_FILE="resources/test_cases.md"
+  run rr 3
+
+  assert_output 'Block without a label'
+}
+
+@test "RR_FILE="test_cases.md" rr 4 --dry" {
+  export RR_FILE="resources/test_cases.md"
+  run rr 4 --dry
+
+   expected=$(cat <<'EOF'
+counter=1
+while [ "$counter" -le 15 ]; do
+  echo "Item $counter"
+  counter=$((counter+1))
+done
+echo "Done"
+EOF
+)
+
+  assert_output "$expected"
+}
+
+@test "RR_FILE="test_cases.md" rr 4" {
+  export RR_FILE="resources/test_cases.md"
+  run rr 4
+
+  assert_output --partial 'Item 1'
+  assert_output --partial 'Item 15'
+  assert_output --partial 'Done'
 }

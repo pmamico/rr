@@ -31,3 +31,14 @@ But this is not a runnable block:
 ```bash
 echo "Block without a label"
 ```
+
+It can handle multiline code blocks:
+
+```sh
+counter=1
+while [ "$counter" -le 15 ]; do
+  echo "Item $counter"
+  counter=$((counter+1))
+done
+echo "Done"
+```
