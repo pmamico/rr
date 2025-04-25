@@ -26,16 +26,16 @@ Right
 Sleep 1s
 
 Type "rr 1 # run by index"
-Sleep 300ms
+Sleep 600ms
 Enter
-Sleep 2s
+Sleep 2.5s
 
-Type@500ms "rr loop # run the block labeled 'loop'"
-Sleep 300ms
+Type@600ms "rr loop # run the block labeled 'loop'"
+Sleep 600ms
 Enter
-Sleep 2s
+Sleep 2.5s
 
 Type "rr # list available tasks"
-Sleep 300ms
+Sleep 600ms
 Enter
 Sleep 7s
