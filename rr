@@ -1,0 +1,152 @@
+#!/usr/bin/env bash
+VERSION="v0.1"
+FILE="${RR_FILE:-README.md}"
+
+show_help() {
+  echo "rr $VERSION - the README runner"
+  cat <<EOF
+Usage:
+  rr                      # List all bash/sh code blocks
+  rr <number|label>       # Execute the specified block
+  rr <number|label> --dry # Print (but don't execute) that block
+  rr --help               # Show this help
+EOF
+}
+
+list_blocks() {
+  local prev="" line idx=0 in_block=0 label norm norm_trimmed
+  while IFS= read -r line; do
+    if [[ $line =~ ^\`\`\`(bash|sh)[[:space:]]*$ ]]; then
+      idx=$((idx+1))
+      # blank line before every block except the first
+      if (( idx > 1 )); then
+        printf "\n"
+      fi
+      # derive label from the line before the fence
+      label=""
+      if [[ $prev =~ ^#+[[:space:]]*(.*) ]]; then
+        label="${BASH_REMATCH[1]}"
+      elif [[ -n $prev && ! $prev =~ ^\`\`\` ]]; then
+        label="$prev"
+      fi
+      # normalize: lowercase, collapse spaces, trim
+      norm="${label,,}"
+      # collapse multiple spaces
+      norm="$(printf "%s" "$norm" | tr -s ' ')"
+      # trim
+      norm_trimmed="$(printf "%s" "$norm" | sed 's/^ *//;s/ *$//')"
+
+      if [[ -n $norm_trimmed ]]; then
+        printf "rr %d / rr %s\n" "$idx" "$norm_trimmed"
+      else
+        printf "rr %d\n" "$idx"
+      fi
+
+      in_block=1
+    elif [[ $line =~ ^\`\`\` ]]; then
+      in_block=0
+    elif (( in_block )); then
+      printf "%s\n" "$line"
+    fi
+    prev="$line"
+  done < "$FILE"
+}
+
+find_block_by_label() {
+  local search="$1"
+  # normalize search term
+  local norm_search norm_search_trimmed
+  norm_search="${search,,}"
+  norm_search="$(printf "%s" "$norm_search" | tr -s ' ')"
+  norm_search_trimmed="$(printf "%s" "$norm_search" | sed 's/^ *//;s/ *$//')"
+
+  local prev="" line idx=0 in_block=0 label norm_label trimmed
+  while IFS= read -r line; do
+    if [[ $line =~ ^\`\`\`(bash|sh)[[:space:]]*$ ]]; then
+      idx=$((idx+1))
+      if [[ $prev =~ ^#+[[:space:]]*(.*) ]]; then
+        label="${BASH_REMATCH[1]}"
+      elif [[ -n $prev && ! $prev =~ ^\`\`\` ]]; then
+        label="$prev"
+      else
+        label=""
+      fi
+      norm_label="${label,,}"
+      norm_label="$(printf "%s" "$norm_label" | tr -s ' ')"
+      trimmed="$(printf "%s" "$norm_label" | sed 's/^ *//;s/ *$//')"
+
+      if [[ "$trimmed" == "$norm_search_trimmed" ]]; then
+        printf "%d" "$idx"
+        return 0
+      fi
+      in_block=1
+    elif [[ $line =~ ^\`\`\` ]]; then
+      in_block=0
+    fi
+    prev="$line"
+  done < "$FILE"
+
+  return 1
+}
+
+run_block() {
+  local target=$1 dry=$2
+  # extract the code lines for block $target
+  local code
+  code=$(awk -v tgt="$target" '
+    BEGIN { block=0; in_block=0 }
+    /^```(bash|sh)[[:space:]]*$/ {
+      block++; in_block=1
+      next
+    }
+    /^```/ { in_block=0; next }
+    in_block && block==tgt { print }
+  ' "$FILE")
+
+  if [[ -z $code ]]; then
+    echo "Error: no block number $target found."
+    exit 1
+  fi
+
+  if [[ $dry == true ]]; then
+    printf '%s\n' "$code"
+  else
+    bash -c "$code"
+  fi
+}
+
+# --- parse arguments ---
+dry=false
+raw=()
+for arg in "$@"; do
+  if [[ $arg == "--dry" ]]; then
+    dry=true
+  else
+    raw+=("$arg")
+  fi
+done
+
+# no args? list
+if (( ${#raw[@]} == 0 )); then
+  list_blocks
+  exit 0
+fi
+
+# build target (number or full label)
+target="${raw[*]}"
+
+if [[ $target == "--help" ]]; then
+  show_help
+  exit 0
+fi
+
+if [[ $target =~ ^[0-9]+$ ]]; then
+  run_block "$target" "$dry"
+else
+  if num=$(find_block_by_label "$target"); then
+    run_block "$num" "$dry"
+  else
+    echo "Error: no block found matching label '$target'."
+    exit 1
+  fi
+fi
