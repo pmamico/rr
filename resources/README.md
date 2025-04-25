@@ -15,6 +15,4 @@ while [ "$counter" -le 3 ]; do
   echo "Item $counter"
   counter=$((counter+1))
 done
-
-
 ```
