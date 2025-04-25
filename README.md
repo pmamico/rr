@@ -5,10 +5,10 @@ It discovers and executes bash/sh code blocks by index or label.
 
 ![resources/demo.gif](resources/demo.gif)
 
-## Configuration
 
-By default, `rr` scans `README.md`. To target a different file, set the `RR_FILE` environment variable:
+## Alternatives
 
-```bash
-export RR_FILE="docs/tasks.md"
-```
+The best known alternatives are [maid](https://github.com/egoist/maid) and [xc](https://github.com/joerdav/xc).  
+`rr` is intended to be portable without any dependencies (bash script only).  
+Works immediately with existing README files without any modifications.
+
