@@ -1,5 +1,12 @@
 # rr - readme runner
 
-`rr` is yet another task runner, but it uses the README.md file as a source.  
-It's capable of running code blocks by its index or label.
+`rr` is a lightweight task runner that treats your project's `README.md` as the source of truth for executable tasks.  
+It discovers and executes bash/sh code blocks by index or label.
 
+## Configuration
+
+By default, `rr` scans `README.md`. To target a different file, set the `RR_FILE` environment variable:
+
+```bash
+export RR_FILE="docs/tasks.md"
+```
